@@ -1,0 +1,15 @@
+{
+  "name": "playpuppeteer",
+  "version": "1.0.0",
+  "description": "Test out the capacity of puppeteer",
+  "main": "index.js",
+  "dependencies": {
+    "puppeteer": "^0.10.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node createform"
+  },
+  "author": "Bruce Ye",
+  "license": "MIT"
+}
