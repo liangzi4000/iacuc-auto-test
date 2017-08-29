@@ -1,9 +1,10 @@
-console.time('createform');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const common = require('./common');
 const data = require('./createform.data');
 
+const ishare = require('./workflow/ishare');
+const studySubmission = require('./workflow/study-submission');
 const sectionDeclaration = require('./sections/section-declaration');
 const sectionStudyFund = require('./sections/section-studyfund');
 const sectionA = require('./sections/section-a');
@@ -43,36 +44,24 @@ common.emptyFolder(fs);
     await page.setViewport({ width: 1366, height: 662 });
     const helper = new common.helper(page);
 
-    // How to solve the pop up "restore pages?"
 
+    console.time('createform');
     // Open login page
-    await page.goto('http://localhost:10000/loginpage/locallogin.aspx', { waitUntil: 'networkidle' });
-    if (page.url().indexOf('Dashboard/DefaultDashboard.aspx')) {
-        await page.evaluate(() => {
-            page.global.LogOut();
-        })
-    }
-
+    await ishare.openLandingPage(helper, data);
     // Login
-    await helper.type('#txtUserID', data.login.loginid);
-    await helper.type('#txtPassword', data.login.password);
-    await helper.clickOn('#btnLogin');
-    await helper.waitForNavigation('networkidle');
-    await helper.screenshot("Login.png");
-
+    await ishare.login(helper, data.Delegate);
     // Create IACUC form
-    await helper.clickOn('#ContentPlaceHolder1_aIACUCCreation');
-    await helper.clickOn('#Scn_SelectIACUCForm div.tinybox.tinybox_iacuc');
-    await helper.waitForNavigation('networkidle');
-    await helper.screenshot("CreateApplicationForm.png");
-
+    await studySubmission.createApplicationForm(helper, data);
     // Close the warning popup window
-    await helper.clickOn('#modal_warming > div > div > div.modal-footer > button.btn.btn-primary');
-
+    await studySubmission.closeSaveFormWarning(helper, data);
+    // Fill up form
     await sectionDeclaration.execute(helper, data);
     await sectionStudyFund.execute(helper, data);
     await sectionA.execute(helper, data);
-    await helper.clickOn('#modal_warming > div > div > div.modal-footer > button.btn.btn-primary');
+    await studySubmission.closeSaveFormWarning(helper, data);
+    const re = /formfk=([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})&startat=SectionA/i;
+    const formid = helper.page.url().match(re)[1];
+
     await sectionB.execute(helper, data);
     await sectionC.execute(helper, data);
     await sectionD.execute(helper, data);
@@ -88,6 +77,25 @@ common.emptyFolder(fs);
     await sectionN.execute(helper, data);
     await sectionO.execute(helper, data);
     await sectionP.execute(helper, data);
+    await studySubmission.finalize(helper, data);
     console.timeEnd('createform');
+    console.time('submitforvetchecklist');
+    await studySubmission.submitForVetChecklist(helper, data);
+    await studySubmission.printForm(helper, data);
+    await studySubmission.exportToPdf(helper, data);
+    await ishare.logout(helper, data);
+    // Vet Login
+    await ishare.login(helper, data.Vet);
+    await studySubmission.openVetChecklistTask(helper, formid);
+    await helper.delay(130);
+    await studySubmission.ReturnVetChecklist(helper, data);
+    await ishare.logout(helper, data);
+    console.timeEnd('submitforvetchecklist');
+
+    // PI declaration and submission
+    await ishare.login(helper, data.PI);
+    await studySubmission.openMyTaskIACUCList(helper, formid);
+    await helper.delay(130);
+    
     //browser.close();
 })();

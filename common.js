@@ -1,5 +1,8 @@
+const screenshotpath = './screenshot/';
+const waitUntilEnum = { load: 'load', networkidle: 'networkidle' };
+
 module.exports = {
-    emptyFolder: function (fs, path = './screenshot/', del = false) {
+    emptyFolder: function (fs, path = screenshotpath, del = false) {
         if (fs.existsSync(path)) {
             let files = fs.readdirSync(path);
             if (files.length > 0) {
@@ -20,8 +23,9 @@ module.exports = {
         }
     },
 
-    helper: function (page, path = './screenshot/') {
+    helper: function (page, path = screenshotpath) {
         this.page = page;
+        this.frame = null;
         this.indexCount = 1;
 
         this.type = async function (selector, value) {
@@ -58,22 +62,26 @@ module.exports = {
 
         this.gotoSection = async function (selector) {
             await this.clickOn(selector);
-            await this.waitForNavigation('networkidle');
+            await this.waitForNavigation(waitUntilEnum.networkidle);
         }
 
-        this.waitForNavigation = async function (type = 'load') {
+        this.waitForNavigation = async function (type = waitUntilEnum.load) {
             await this.page.waitForNavigation({ waitUntil: type });
         }
 
         this.typeRichTextBox = async function (selector, value, rleft = 30, rtop = 34) {
-            await this.page.waitForSelector(selector, { visible: true });
-            await this.page.evaluate((sel) => {
-                document.querySelector(sel).scrollIntoView();
-            }, selector);
+            await this.scrollIntoElem(selector);
             let coordinator = await this.offset(selector);
             await this.page.mouse.click(coordinator.left + rleft, coordinator.top + rtop, { clickCount: 2 });
             await this.page.type(value);
             await this.page.mouse.click(0, 0);//trigger lose focus
+        }
+
+        this.scrollIntoElem = async function (selector) {
+            await this.page.waitForSelector(selector, { visible: true });
+            await this.page.evaluate((sel) => {
+                document.querySelector(sel).scrollIntoView();
+            }, selector);
         }
 
         this.screenshot = async function (filename) {
@@ -99,6 +107,41 @@ module.exports = {
                 return Promise.resolve({ left: box.left, top: box.top });
             }, selector);
             return result;
+        }
+
+        this.iframetype = async function (iframeselector, elemselector, value) {
+            await this.page.waitForSelector(iframeselector, { visible: true });
+            await this.iframefocus(iframeselector, elemselector);
+            await this.page.type(value);
+        }
+
+        this.iframefocus = async function (iframeselector, elemselector) {
+            await this.page.evaluate((data) => {
+                const ifrm = document.querySelector(data.iframeselector);
+                ifrmdoc = ifrm.contentDocument || ifrm.contentWindow.document;
+                ifrmdoc.querySelector(data.elemselector).focus();
+            }, { iframeselector, elemselector });
+        }
+
+        this.iframeuploadfile = async function (fileinputselector, filepath) {
+            const inputFile = await this.frame.$(fileinputselector);
+            await inputFile.uploadFile(filepath);
+        }
+
+        this.iframeClickOn = async function (elemselector) {
+            await this.frame.evaluate((sel) => {
+                document.querySelector(sel).click();
+            }, elemselector);
+        }
+
+        this.setFrame = function (fnFrameSelector) {
+            this.frame = this.page.frames().find(fnFrameSelector);
+        }
+
+        this.delay = async function (second) {
+            return new Promise(resolve => {
+                setTimeout(resolve, second * 1000);
+            });
         }
     }
 } 

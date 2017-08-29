@@ -3,6 +3,8 @@ const fs = require('fs');
 const common = require('./common');
 const data = require('./createform.data');
 
+const ishare = require('./workflow/ishare');
+const studySubmission = require('./workflow/study-submission');
 const sectionDeclaration = require('./sections/section-declaration');
 const sectionStudyFund = require('./sections/section-studyfund');
 const sectionA = require('./sections/section-a');
@@ -24,6 +26,8 @@ const sectionP = require('./sections/section-p');
 
 common.emptyFolder(fs);
 
+
+
 (async () => {
     const browser = await puppeteer.launch({
         headless: false, args: [
@@ -36,35 +40,37 @@ common.emptyFolder(fs);
             //'--disable-session-crashed-bubble',
             //'--incognito'
         ],
-        //slowMo:120
+        //slowMo: 120
     });
+    const formurl = 'http://localhost:10000/IACUC/WorkSpace/Index?formfk=ed50054a-7efe-4cf6-a2eb-8b3e94b5967d';
     const page = await browser.newPage();
     await page.setViewport({ width: 1366, height: 662 });
     const helper = new common.helper(page);
 
-    // How to solve the pop up "restore pages?"
-
     // Open login page
-    await page.goto('http://localhost:10000/loginpage/locallogin.aspx', { waitUntil: 'networkidle' });
-    if (page.url().indexOf('Dashboard/DefaultDashboard.aspx')) {
-        await page.evaluate(() => {
-            page.global.LogOut();
-        })
-    }
-
+    await ishare.openLandingPage(helper, data);
     // Login
-    await helper.type('#txtUserID', data.login.loginid);
-    await helper.type('#txtPassword', data.login.password);
-    await helper.clickOn('#btnLogin');
-    await helper.waitForNavigation('networkidle');
-    await helper.screenshot("Login.png");
+    await ishare.login(helper, data.Delegate);
 
     // Open existing form to edit
-    await page.goto('http://localhost:10000/IACUC/WorkSpace/Index?formfk=a6cecf05-dbc0-4576-a23b-ec89c389606b', { waitUntil: 'networkidle' });
+    await page.goto(formurl, { waitUntil: 'networkidle', networkIdleTimeout: 3000 });
     // Close the warning popup window
-    await helper.clickOn('#modal_warming > div > div > div.modal-footer > button.btn.btn-primary');
-    
-    sectionJ.execute(helper,data);
+    //await helper.clickOn('#modal_warming > div > div > div.modal-footer > button.btn.btn-primary');
+
+    //sectionJ.execute(helper, data);
+    //studySubmission.submitForVetChecklist(helper, data);
+    await studySubmission.printForm(helper, data);
+    await studySubmission.exportToPdf(helper, data);
+    return;
+    await ishare.logout(helper, data);
+
+    await ishare.login(helper, data.Vet);
+    await page.goto(formurl, { waitUntil: 'networkidle' });
+    await helper.delay(130);
+
+    //return new Promise.resolve(resolve => { setTimeout(() => { }, 130000) })
+
+    await studySubmission.ReturnVetChecklist(helper, data);
 
     /* 
     const chklist = await page.$$('input[type="checkbox"]');

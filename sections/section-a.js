@@ -13,19 +13,19 @@ module.exports = {
         await helper.clickOn('input[name="Form.SA1_7"][value="False"]');
         // Add PI
         await helper.clickOn('#btn_PI');
-        await helper.type('#sectionA_searchEmail', data.PI.name);
+        await helper.type('#sectionA_searchEmail', data.PI.profile.name);
         await helper.clickOn('#btnSearchPI');
         await helper.waitForNavigation('networkidle');
         await helper.clickOn('#SectionA_SearchResult > table > tbody > tr:nth-child(1) input[name="SectionA_PI"]');
-        await helper.setSelectVal('#Qualification', data.PI.qualification);
-        await helper.type('#CertNumberAndDate', data.PI.cert);
-        await helper.type('#ContactNumber', data.PI.contact);
+        await helper.setSelectVal('#Qualification', data.PI.profile.qualification);
+        await helper.type('#CertNumberAndDate', data.PI.profile.cert);
+        await helper.type('#ContactNumber', data.PI.profile.contact);
         await helper.clickOn('#stm_confirm');
         // Fill up Delegate info
         await helper.clickOn('div#FormTeamCollaborators_JsonTable tbody tr:nth-child(1) i.fa.fa-pencil.fanomargin');
-        await helper.setSelectVal('#Edit_TC_Qualification', data.login.profile.qualification);
-        await helper.type('#Edit_TC_CertNumberAndDate', data.login.profile.cert);
-        await helper.type('#Edit_TC_ContactNumber', data.login.profile.contact);
+        await helper.setSelectVal('#Edit_TC_Qualification', data.Delegate.profile.qualification);
+        await helper.type('#Edit_TC_CertNumberAndDate', data.Delegate.profile.cert);
+        await helper.type('#Edit_TC_ContactNumber', data.Delegate.profile.contact);
         await helper.clickOn('#Edit_TC_confirm');
         // Add team collaborator 
         // Here must use for loop, cannot use forEach as it will execute simultaneously
