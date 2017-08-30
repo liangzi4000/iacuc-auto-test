@@ -42,7 +42,8 @@ common.emptyFolder(fs);
         ],
         //slowMo: 120
     });
-    const formurl = 'http://localhost:10000/IACUC/WorkSpace/Index?formfk=ed50054a-7efe-4cf6-a2eb-8b3e94b5967d';
+    const formid = '03cc3c14-cced-4f37-8a18-17c95bbc79e9';
+    const formurl = `http://localhost:10000/IACUC/WorkSpace/Index?formfk=${formid}`;
     const page = await browser.newPage();
     await page.setViewport({ width: 1366, height: 662 });
     const helper = new common.helper(page);
@@ -60,23 +61,25 @@ common.emptyFolder(fs);
     //sectionJ.execute(helper, data);
     //studySubmission.submitForVetChecklist(helper, data);
     await studySubmission.printForm(helper, data);
-    await studySubmission.exportToPdf(helper, data);
-    return;
+    await studySubmission.exportToPdf(helper, browser);
+    
     await ishare.logout(helper, data);
-
+    
+    // Vet Login
+    await studySubmission.resetConnection(helper, formid);
+    await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.Vet);
-    await page.goto(formurl, { waitUntil: 'networkidle' });
-    await helper.delay(130);
+    await studySubmission.openVetChecklistTask(helper, formid);
+    //await helper.delay(130);
+    await studySubmission.returnVetChecklist(helper, data);
+    await ishare.logout(helper, data);
+    
 
-    //return new Promise.resolve(resolve => { setTimeout(() => { }, 130000) })
+    // PI declaration and submission
+    await studySubmission.resetConnection(helper, formid);
+    await ishare.openLandingPage(helper, data);
+    await ishare.login(helper, data.PI);
+    await studySubmission.openMyTaskIACUCList(helper, formid);
+    await studySubmission.declareAndSubmitToIACUC(helper, data);
 
-    await studySubmission.ReturnVetChecklist(helper, data);
-
-    /* 
-    const chklist = await page.$$('input[type="checkbox"]');
-    console.log(chklist.length);
-    for (let i = 0; i < chklist.length; i++){
-        chklist[i].click(); //
-    }
- */
 })()

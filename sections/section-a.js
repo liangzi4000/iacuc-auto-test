@@ -43,7 +43,7 @@ module.exports = {
         await helper.typeRichTextBox('#Form_SA4_1', 'success!');
         await helper.screenshot("SectionA.png");
         await helper.clickOn('i.fa.IACUCSaveIcon');
-        await helper.waitForNavigation('networkidle');
+        await helper.waitForNavigation();
         await helper.screenshot("FormSaved.png");
     }
 }

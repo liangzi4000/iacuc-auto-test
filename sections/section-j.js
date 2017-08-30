@@ -24,6 +24,8 @@ module.exports = {
         await helper.iframetype(iframeselector, 'input.form-control[id*="SJ4_1"][id*="FileName"]', 'checklist test');
         await helper.iframeClickOn('button.btn.btn-green[id*="SJ4_1"]');
         await helper.waitForNavigation('networkidle');
+        // Wait for file rendered on the page
+        await helper.frame.waitForSelector('i.fa.fa-file', { visible: true });
 
         await helper.clickOn('input[name="Form.SJ3"][value="True"]');
         await helper.typeTextarea('#Form_SJ3_Y_1', 'Has major surgery been performed on these animals prior to being placed in this study - test');

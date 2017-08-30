@@ -92,6 +92,13 @@ module.exports = {
             return (count > 9 ? count : '0' + count) + '. ';
         }
 
+        this.getAttr = async function (selector, attr, context) {
+            const result = await context.evaluate((data) => {
+                return document.querySelector(data.selector).getAttribute(data.attr);
+            }, { selector, attr });
+            return result;
+        }
+
         /*         
         this.scrollToBottom = async function (selector = 'body') {
             this.page.evaluate((sel) => {
@@ -142,6 +149,12 @@ module.exports = {
             return new Promise(resolve => {
                 setTimeout(resolve, second * 1000);
             });
+        }
+
+        this.currentHost = function () {
+            // Example url: https://stackoverflow.com/questions/6941533/get-protocol-domain-and-port-from-url
+            const result = this.page.url().split('/');
+            return `${result[0]}//${result[2]}`;
         }
     }
 } 

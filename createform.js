@@ -25,7 +25,7 @@ const sectionO = require('./sections/section-o');
 const sectionP = require('./sections/section-p');
 
 common.emptyFolder(fs);
-
+console.time('total');
 (async () => {
     const browser = await puppeteer.launch({
         headless: false, args: [
@@ -82,20 +82,26 @@ common.emptyFolder(fs);
     console.time('submitforvetchecklist');
     await studySubmission.submitForVetChecklist(helper, data);
     await studySubmission.printForm(helper, data);
-    await studySubmission.exportToPdf(helper, data);
+    //await studySubmission.exportToPdf(helper, browser);
     await ishare.logout(helper, data);
+    
     // Vet Login
+    await studySubmission.resetConnection(helper, formid);
+    await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.Vet);
     await studySubmission.openVetChecklistTask(helper, formid);
-    await helper.delay(130);
-    await studySubmission.ReturnVetChecklist(helper, data);
+    //await helper.delay(130);
+    await studySubmission.returnVetChecklist(helper, data);
     await ishare.logout(helper, data);
     console.timeEnd('submitforvetchecklist');
 
     // PI declaration and submission
+    await studySubmission.resetConnection(helper, formid);
+    await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.PI);
     await studySubmission.openMyTaskIACUCList(helper, formid);
-    await helper.delay(130);
-    
+    await studySubmission.declareAndSubmitToIACUC(helper, data);
+    console.timeEnd('total');
+    console.log('Completed');
     //browser.close();
 })();
