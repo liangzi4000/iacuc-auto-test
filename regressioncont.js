@@ -5,6 +5,7 @@ const data = require('./regression.data');
 
 const ishare = require('./workflow/ishare');
 const studySubmission = require('./workflow/study-submission');
+const studyReview = require('./workflow/study-review');
 const sectionDeclaration = require('./sections/section-declaration');
 const sectionStudyFund = require('./sections/section-studyfund');
 const sectionA = require('./sections/section-a');
@@ -40,45 +41,28 @@ common.emptyFolder(fs);
         ],
         //slowMo: 120
     });
-    const formid = 'f59174e8-1006-4e6c-ac30-20c00937a3fa';
+    const formid = 'ac915032-993d-4391-8f0b-9dd375e3f683';
     const formurl = `http://localhost:10000/IACUC/WorkSpace/Index?formfk=${formid}`;
     const page = await browser.newPage();
-    await page.setViewport({ width: data.Environment.width, height: data.Environment.height });
+    await page.setViewport({ width: data.Environment.resolution.width, height: data.Environment.resolution.height });
     const helper = new common.helper(page);
 
     // Open login page
     await ishare.openLandingPage(helper, data);
     // Login
-    await ishare.login(helper, data.Delegate);
+    await ishare.login(helper, data.Secretariat);
 
-    // Open existing form to edit
-    await page.goto(formurl, { waitUntil: 'networkidle', networkIdleTimeout: 3000 });
-    // Close the warning popup window
-    //await helper.clickOn('#modal_warming > div > div > div.modal-footer > button.btn.btn-primary');
-
-    //sectionJ.execute(helper, data);
-    //studySubmission.submitForVetChecklist(helper, data);
-    await studySubmission.printForm(helper, data);
-
-    //await studySubmission.exportToPdf(helper, browser);
+    await studyReview.secAppTaskList(helper, data);
+    await studyReview.openFormInReviewWorkspace(helper, formid);
+    await studyReview.sendPreliminaryMsgToPI(helper, data);
 
     await ishare.logout(helper, data);
-
-    // Vet Login
-    await studySubmission.resetConnection(helper, formid);
     await ishare.openLandingPage(helper, data);
-    await ishare.login(helper, data.Vet);
-    await studySubmission.openVetChecklistTask(helper, formid);
-    //await helper.delay(130);
-    await studySubmission.returnVetChecklist(helper, data);
-    await ishare.logout(helper, data);
 
 
-    // PI declaration and submission
-    await studySubmission.resetConnection(helper, formid);
-    await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.PI);
     await studySubmission.openMyTaskIACUCList(helper, formid);
-    await studySubmission.declareAndSubmitToIACUC(helper, data);
+    await studySubmission.replyIACUCQuery(helper, data);
+
 
 })()

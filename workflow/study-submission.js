@@ -57,21 +57,7 @@ module.exports = {
 
     printForm: async function (helper, data) {
         await helper.clickOn('i.fa.IACUCPrintIcon');
-        await helper.page.waitForFunction(() => {
-            let myIframe = document.querySelector('#printArea iframe');
-            if (myIframe) {
-                let doc = myIframe.contentWindow || myIframe.contentDocument;
-                if (doc.document) doc = doc.document;
-                if (doc.readyState == "complete" && doc.querySelector('div.formTitle')) {
-                    console.log(true);
-                    console.log(doc.body);
-                    return true;
-                } else {
-                    console.log(false);
-                    return false;
-                }
-            }
-        }, { polling: 300 });
+        await helper.waitForiFrameRendered('#printArea iframe', 'div.formTitle');
         await helper.screenshot("PrintForm.png");
     },
 
@@ -113,5 +99,38 @@ module.exports = {
 
     resetConnection: async function (helper, formid) {
         await helper.page.goto(`${helper.currentHost()}/AutoTest/executesql.aspx?formid=${formid}`, { waitUntil: 'networkidle' });
+    },
+
+    replyIACUCQuery: async function (helper, data) {
+        await helper.clickOn('i.fa.IACUCPIOrSecMailboxIcon');
+
+        let contentSelector = 'li > a.Tabhandover-title-active';
+        const ifrmSelector = '#pimailbox_iframe';
+        await helper.waitForiFrameRendered(ifrmSelector, contentSelector);
+        await helper.screenshot("MessageFromSecretariat.png");
+        helper.setFrame(x => x.url().includes('/IACUC/Comment/PIMailBox?formFK='));
+        await helper.frame.evaluate((data) => {
+            const list = document.querySelectorAll('td > a');
+            list.forEach((elem) => {
+                if (elem.text == data.PreliminaryCheck.subject) {
+                    elem.click();
+                }
+            });
+        }, data);
+
+
+
+
+        /*         await helper.clickOn('i.fa.IACUCPIOrSecMailboxIcon');
+                let contentSelector = 'a[href*="/IACUC/Comment/SecPIRequetList?ReviewItemId="]';
+                const ifrmSelector = '#commentIfr';
+                await helper.waitForiFrameRendered(ifrmSelector, contentSelector);
+                helper.setFrame(x => x.url().includes('/IACUC/Comment/CommentsFromReviewers?ReviewItemID='));
+                await helper.iframeClickOn('a[href*="/IACUC/Comment/MessageToPI?ReviewItemID="]');
+                await helper.waitForiFrameRendered(ifrmSelector, contentSelector);
+                await helper.screenshot("MessageToPI.png");
+                await helper.iframeClickOn('a > i.fa.fa-plus-square');
+                contentSelector = '#optionalSubject'; */
+
     }
 }

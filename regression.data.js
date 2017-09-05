@@ -24,5 +24,14 @@ module.exports = {
         loginid: 'srrbog',
         password: 'secretabc',
         profile: { id: '65b72ffa-c17b-4234-9a95-78dbd277ca54', name: 'Ogden Bryan' }
+    },
+    Secretariat: {
+        loginid: 'srrlhl',
+        password: 'secretabc'
+    },
+    PreliminaryCheck: {
+        subject: `Preliminary check message subject ${+new Date()}`,
+        question: 'Test preliminary check message detail',
+        answer: 'Answer the test preliminary check message detail'
     }
 }

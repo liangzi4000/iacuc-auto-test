@@ -19,9 +19,9 @@ module.exports = {
         const iframeselector = 'iframe[src*="/IACUC/Partial/UploadForm/SJ4_1File"]';
         await helper.scrollIntoElem(iframeselector);
         helper.setFrame(x => x.url().includes('/IACUC/Partial/UploadForm/SJ4_1File'));
-        await helper.iframeuploadfile('input.fileupload.btn[id*="SJ4_1"]', './sections/section-a.js');
-        await helper.iframetype(iframeselector, 'input.form-control[id*="SJ4_1"][id*="Version"]', '1');
-        await helper.iframetype(iframeselector, 'input.form-control[id*="SJ4_1"][id*="FileName"]', 'checklist test');
+        await helper.iframeUploadFile('input.fileupload.btn[id*="SJ4_1"]', './sections/section-a.js');
+        await helper.iframeType(iframeselector, 'input.form-control[id*="SJ4_1"][id*="Version"]', '1');
+        await helper.iframeType(iframeselector, 'input.form-control[id*="SJ4_1"][id*="FileName"]', 'checklist test');
         await helper.iframeClickOn('button.btn.btn-green[id*="SJ4_1"]');
         await helper.waitForNavigation('networkidle');
         // Wait for file rendered on the page

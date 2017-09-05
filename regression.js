@@ -41,7 +41,7 @@ console.time('total');
         //slowMo:120
     });
     const page = await browser.newPage();
-    await page.setViewport({ width: data.Environment.width, height: data.Environment.height });
+    await page.setViewport({ width: data.Environment.resolution.width, height: data.Environment.resolution.height });
     const helper = new common.helper(page);
 
 

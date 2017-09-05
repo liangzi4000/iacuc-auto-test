@@ -38,16 +38,20 @@ module.exports = {
             await this.typeRichTextBox(selector, value, 5, 5);
         }
 
-        this.setSelectVal = async function (selector, value) {
-            this.page.evaluate((data) => {
+        this.setSelectVal = async function (selector, value, isframe = false) {
+            let context = this.page;
+            if (isframe) context = this.frame;
+            context.evaluate((data) => {
                 let el = document.querySelector(data.selector);
                 el.value = data.value;
                 return el.dispatchEvent(new Event('change'));
             }, { selector, value })
         }
 
-        this.setSelectIndex = async function (selector, index) {
-            this.page.evaluate((data) => {
+        this.setSelectIndex = async function (selector, index, isframe = false) {
+            let context = this.page;
+            if (isframe) context = this.frame;
+            context.evaluate((data) => {
                 let el = document.querySelector(data.selector);
                 const value = document.querySelector(`${data.selector} option:nth-child(${data.index + 1})`).value;
                 el.value = value;
@@ -116,21 +120,23 @@ module.exports = {
             return result;
         }
 
-        this.iframetype = async function (iframeselector, elemselector, value) {
+        this.iframeType = async function (iframeselector, elemselector, value) {
             await this.page.waitForSelector(iframeselector, { visible: true });
-            await this.iframefocus(iframeselector, elemselector);
+            await this.iframeFocus(iframeselector, elemselector);
             await this.page.type(value);
         }
 
-        this.iframefocus = async function (iframeselector, elemselector) {
+        this.iframeFocus = async function (iframeselector, elemselector) {
             await this.page.evaluate((data) => {
                 const ifrm = document.querySelector(data.iframeselector);
                 ifrmdoc = ifrm.contentDocument || ifrm.contentWindow.document;
+                if (ifrmdoc.document) ifrmdoc = ifrmdoc.document;
+                console.log(ifrmdoc)
                 ifrmdoc.querySelector(data.elemselector).focus();
             }, { iframeselector, elemselector });
         }
 
-        this.iframeuploadfile = async function (fileinputselector, filepath) {
+        this.iframeUploadFile = async function (fileinputselector, filepath) {
             const inputFile = await this.frame.$(fileinputselector);
             await inputFile.uploadFile(filepath);
         }
@@ -155,6 +161,24 @@ module.exports = {
             // Example url: https://stackoverflow.com/questions/6941533/get-protocol-domain-and-port-from-url
             const result = this.page.url().split('/');
             return `${result[0]}//${result[2]}`;
+        }
+
+        this.waitForiFrameRendered = async function (ifrmSelector, contentSelector) {
+            await this.waitForNavigation('networkidle');
+            await this.page.waitForFunction((sel) => {
+                let myIframe = document.querySelector(sel.ifrmSelector);
+                if (myIframe) {
+                    let doc = myIframe.contentWindow || myIframe.contentDocument;
+                    if (doc.document) doc = doc.document;
+                    if (doc.readyState == "complete" && doc.querySelector(sel.contentSelector)) {
+                        console.log(true)
+                        return true;
+                    } else {
+                        console.log(false)
+                        return false;
+                    }
+                }
+            }, { polling: 300 }, { ifrmSelector, contentSelector })
         }
     }
 } 
