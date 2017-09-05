@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const common = require('./common');
-const data = require('./createform.data');
+const data = require('./regression.data');
 
 const ishare = require('./workflow/ishare');
 const studySubmission = require('./workflow/study-submission');
@@ -25,9 +25,7 @@ const sectionO = require('./sections/section-o');
 const sectionP = require('./sections/section-p');
 
 common.emptyFolder(fs);
-
-
-
+console.time('total');
 (async () => {
     const browser = await puppeteer.launch({
         headless: false, args: [
@@ -40,31 +38,53 @@ common.emptyFolder(fs);
             //'--disable-session-crashed-bubble',
             //'--incognito'
         ],
-        //slowMo: 120
+        //slowMo:120
     });
-    const formid = '03cc3c14-cced-4f37-8a18-17c95bbc79e9';
-    const formurl = `http://localhost:10000/IACUC/WorkSpace/Index?formfk=${formid}`;
     const page = await browser.newPage();
-    await page.setViewport({ width: 1366, height: 662 });
+    await page.setViewport({ width: data.Environment.width, height: data.Environment.height });
     const helper = new common.helper(page);
 
+
+    console.time('createform');
     // Open login page
     await ishare.openLandingPage(helper, data);
     // Login
     await ishare.login(helper, data.Delegate);
-
-    // Open existing form to edit
-    await page.goto(formurl, { waitUntil: 'networkidle', networkIdleTimeout: 3000 });
+    // Create IACUC form
+    await studySubmission.createApplicationForm(helper, data);
     // Close the warning popup window
-    //await helper.clickOn('#modal_warming > div > div > div.modal-footer > button.btn.btn-primary');
+    await studySubmission.closeSaveFormWarning(helper, data);
+    // Fill up form
+    await sectionDeclaration.execute(helper, data);
+    await sectionStudyFund.execute(helper, data);
+    await sectionA.execute(helper, data);
+    await studySubmission.closeSaveFormWarning(helper, data);
+    const re = /formfk=([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})&startat=SectionA/i;
+    const formid = helper.page.url().match(re)[1];
 
-    //sectionJ.execute(helper, data);
-    //studySubmission.submitForVetChecklist(helper, data);
+    await sectionB.execute(helper, data);
+    await sectionC.execute(helper, data);
+    await sectionD.execute(helper, data);
+    await sectionE.execute(helper, data);
+    await sectionF.execute(helper, data);
+    await sectionG.execute(helper, data);
+    await sectionH.execute(helper, data);
+    await sectionI.execute(helper, data);
+    await sectionJ.execute(helper, data);
+    await sectionK.execute(helper, data);
+    await sectionL.execute(helper, data);
+    await sectionM.execute(helper, data);
+    await sectionN.execute(helper, data);
+    await sectionO.execute(helper, data);
+    await sectionP.execute(helper, data);
+    await studySubmission.finalize(helper, data);
+    console.timeEnd('createform');
+    console.time('submitforvetchecklist');
+    await studySubmission.submitForVetChecklist(helper, data);
     await studySubmission.printForm(helper, data);
-    await studySubmission.exportToPdf(helper, browser);
-    
+    //await studySubmission.exportToPdf(helper, browser);
     await ishare.logout(helper, data);
-    
+
     // Vet Login
     await studySubmission.resetConnection(helper, formid);
     await ishare.openLandingPage(helper, data);
@@ -73,7 +93,7 @@ common.emptyFolder(fs);
     //await helper.delay(130);
     await studySubmission.returnVetChecklist(helper, data);
     await ishare.logout(helper, data);
-    
+    console.timeEnd('submitforvetchecklist');
 
     // PI declaration and submission
     await studySubmission.resetConnection(helper, formid);
@@ -81,5 +101,7 @@ common.emptyFolder(fs);
     await ishare.login(helper, data.PI);
     await studySubmission.openMyTaskIACUCList(helper, formid);
     await studySubmission.declareAndSubmitToIACUC(helper, data);
-
-})()
+    console.timeEnd('total');
+    console.log('Completed');
+    //browser.close();
+})();

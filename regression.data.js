@@ -1,4 +1,8 @@
 module.exports = {
+    Environment: {
+        host: 'http://localhost:10000',
+        resolution: { width: 1366, height: 662 }
+    },
     Delegate: {
         loginid: 'ncmhth',
         password: 'ishare123',

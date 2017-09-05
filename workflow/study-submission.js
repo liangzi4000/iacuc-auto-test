@@ -57,11 +57,21 @@ module.exports = {
 
     printForm: async function (helper, data) {
         await helper.clickOn('i.fa.IACUCPrintIcon');
-        await helper.waitForNavigation('networkidle');
-        // Wait for iframe content fully rendered
-        await helper.page.waitForSelector('#printArea iframe', { visible: true });
-        helper.setFrame(x => x.url().includes('/IACUC/PrintPage/ApplicationForm?id='));
-        await helper.frame.waitForSelector('div.formTitle', { visible: true });
+        await helper.page.waitForFunction(() => {
+            let myIframe = document.querySelector('#printArea iframe');
+            if (myIframe) {
+                let doc = myIframe.contentWindow || myIframe.contentDocument;
+                if (doc.document) doc = doc.document;
+                if (doc.readyState == "complete" && doc.querySelector('div.formTitle')) {
+                    console.log(true);
+                    console.log(doc.body);
+                    return true;
+                } else {
+                    console.log(false);
+                    return false;
+                }
+            }
+        }, { polling: 300 });
         await helper.screenshot("PrintForm.png");
     },
 
@@ -80,9 +90,9 @@ module.exports = {
 
 
         /* await downloadpage.screenshot({ path: './screenshot/' + helper.shotIndex(helper.indexCount++) + 'ExportToPDF.png', fullPage: true });
-
+    
         return;
-
+    
         await helper.iframeClickOn('#print-toolbar span.print-toolbar-6.print-toolbar-img');
         helper.page.on('response', console.log);
         await helper.iframeClickOn('div.show-pdf-button a.show-pdf-link.showPDF');

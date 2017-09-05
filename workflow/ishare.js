@@ -8,9 +8,10 @@ module.exports = {
     },
 
     openLandingPage: async function (helper, data) {
-        await helper.page.goto('http://localhost:10000/loginpage/locallogin.aspx');
-        if (helper.page.url().indexOf('Dashboard/DefaultDashboard.aspx')) {
+        await helper.page.goto(`${data.Environment.host}/loginpage/locallogin.aspx`);
+        if (helper.page.url().indexOf('/loginpage/locallogin.aspx') == -1) {
             await this.logout(helper, data);
+            await helper.page.goto(`${data.Environment.host}/loginpage/locallogin.aspx`);
         }
     },
 

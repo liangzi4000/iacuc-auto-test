@@ -4,11 +4,11 @@
   "description": "Test out the capacity of puppeteer",
   "main": "index.js",
   "dependencies": {
-    "puppeteer": "^0.10.0"
+    "puppeteer": "^0.10.2"
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node createform"
+    "start": "node regression"
   },
   "author": "Bruce Ye",
   "license": "MIT"
