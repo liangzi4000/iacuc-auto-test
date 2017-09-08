@@ -32,6 +32,48 @@ module.exports = {
     PreliminaryCheck: {
         subject: `Preliminary check message subject ${+new Date()}`,
         question: 'Test preliminary check message detail',
-        answer: 'Answer the test preliminary check message detail'
+        answer: 'Answer the test preliminary check message detail',
+        formchange: {
+            sectionB: 'Edit section B for preliminary check',
+            sectionC: 'Edit section C for preliminary check',
+            sectionD: 'Edit section D for preliminary check'
+        }
+    },
+    Meeting: {
+        id: '878c7d7e-5b55-4b51-b33f-d561cc3412d3'
+    },
+    Chairman: {
+        loginid: 'eriabv',
+        password: 'secretabc'
+    },
+    PR: {
+        loginid: 'ralph.bunte@duke-nus.edu.sg',
+        password: 'secretabc',
+        profile: { memid: '0c142f2d-02c9-489e-bd24-a792917ea8c0' },
+        comment: 'PR comment',
+        role: 'PR'
+    },
+    SR: {
+        loginid: 'srrmto',
+        password: 'secretabc',
+        profile: { memid: 'c95737ee-0762-4ea3-8e7b-1828baf16204' },
+        comment: 'SR comment',
+        role: 'SR'
+    },
+    OtherReviewer: {
+        loginid: 'srrbog',
+        password: 'secretabc',
+        comment: 'Other Reviewer comment',
+        role: 'OtherReviewer'
+    },
+    ReviewerComment: {
+        subject: `Reviewer Comment ${+new Date()}`,
+        answer: 'Answer the test revier comment detail',
+        formchange: {
+            sectionB: 'Edit section B for reviewer comment',
+            sectionC: 'Edit section C for reviewer comment',
+            sectionD: 'Edit section D for reviewer comment'
+        }
     }
+
 }

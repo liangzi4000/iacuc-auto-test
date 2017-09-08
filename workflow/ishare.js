@@ -3,7 +3,7 @@ module.exports = {
         await helper.type('#txtUserID', data.loginid);
         await helper.type('#txtPassword', data.password);
         await helper.clickOn('#btnLogin');
-        await helper.waitForNavigation();
+        await helper.waitForNavigation('networkidle');
         await helper.screenshot(`${data.loginid}_Login.png`);
     },
 
@@ -20,5 +20,6 @@ module.exports = {
             page.global.LogOut();
         })
         await helper.waitForNavigation();
+        //await helper.page.goto(`${data.Environment.host}/LogOut.aspx`);
     }
 }

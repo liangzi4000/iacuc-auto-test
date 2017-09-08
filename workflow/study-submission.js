@@ -101,36 +101,95 @@ module.exports = {
         await helper.page.goto(`${helper.currentHost()}/AutoTest/executesql.aspx?formid=${formid}`, { waitUntil: 'networkidle' });
     },
 
-    replyIACUCQuery: async function (helper, data) {
+    replyIACUCQuery: async function (helper, query) {
+        // Click on PI Mailbox icon
         await helper.clickOn('i.fa.IACUCPIOrSecMailboxIcon');
-
+        // Wait for PI Mailbox page loading
         let contentSelector = 'li > a.Tabhandover-title-active';
         const ifrmSelector = '#pimailbox_iframe';
         await helper.waitForiFrameRendered(ifrmSelector, contentSelector);
         await helper.screenshot("MessageFromSecretariat.png");
         helper.setFrame(x => x.url().includes('/IACUC/Comment/PIMailBox?formFK='));
-        await helper.frame.evaluate((data) => {
+        // Click on secretariat message
+        await helper.frame.evaluate((query) => {
             const list = document.querySelectorAll('td > a');
             list.forEach((elem) => {
-                if (elem.text == data.PreliminaryCheck.subject) {
+                if (elem.text == query.subject) {
                     elem.click();
                 }
             });
-        }, data);
+        }, query);
+        // Wait for message detail page loading
+        contentSelector = 'div.PIReplyMessage';
+        await helper.waitForiFrameRendered(ifrmSelector, contentSelector);
+        // Reply all queries
+        await helper.frame.evaluate((query) => {
+            const ReviewerCommentsSelector = 'div.ReviewerComments';
+            const list = document.querySelectorAll(ReviewerCommentsSelector);
+            list.forEach((div, index) => {
+                if (document.querySelector(`${ReviewerCommentsSelector}:nth-child(${index}) i.fa.fa-chevron-right`)) {
+                    document.querySelector(`${ReviewerCommentsSelector}:nth-child(${index}) div.ReviewerComments-title`).click();
+                }
+                const id = `Items_${index}__ReplyItem_Reply`;
+                document.querySelector(`#${id}`).scrollIntoView();
+                uectrl = UE.getEditor(id);
+                uectrl.ready(() => {
+                    uectrl.setContent(`${query.answer} ${index}`);
+                });
+            });
+        }, query);
+        // Click on save button
+        helper.iframeClickOn('i.fa.IACUCSaveIcon');
+        // Wait for page postback.
+        await helper.waitForiFrameRendered(ifrmSelector, contentSelector);
+        // Click on send message button
+        helper.iframeClickOn('i.fa.IACUCReplayMsgToSecIcon');
+        // Wait for send success message
+        await helper.waitForiFrameRendered(ifrmSelector, contentSelector);
+        await helper.screenshot("ReplyPreliminaryCheckMessage.png");
+        // Close PI Mailbox
+        await helper.clickOn('#modal_PIMailbox button.close');
+        // Wait for postback
+        await helper.waitForNavigation('networkidle');
+    },
 
+    unlockForm: async function (helper, data) {
+        // Click on unlock icon
+        await helper.clickOn('i.fa.IACUCUnlockIcon');
+        await helper.clickOn('#modal_Unlock button[btn="confirm"]');
+        await helper.waitForNavigation('networkidle');
+        await helper.screenshot("UnlockForm.png");
+    },
 
+    editForm: async function (helper, data) {
+        await helper.gotoSection('a.list-group-item[key="section_b"]');
+        await helper.setRichTextBox('#Form_SB1', data.formchange.sectionB);
+        await helper.screenshot("EditSectionB.png");
+        await helper.gotoSection('a.list-group-item[key="section_c"]');
+        await helper.setRichTextBox('#Form_SC1', data.formchange.sectionC);
+        await helper.screenshot("EditSectionC.png");
+        await helper.gotoSection('a.list-group-item[key="section_d"]');
+        await helper.clickOn('input[name="Form.SD2"][value="True"]');
+        await helper.typeTextarea('#Form_SD2_Y_1', data.formchange.sectionD);
+        await helper.screenshot("EditSectionD.png");
+    },
 
+    submitToIACUC: async function (helper, data) {
+        // Click on submit to iacuc icon
+        // await helper.clickOn('i.fa.IACUCPISubAppIcon'); why this code not working?
+        await helper.page.waitForFunction(() => {
+            if(document.querySelector('a[onclick="iacucws.submissionForm();"]')){
+                window.iacucws.submissionForm();
+                return true;
+            }
+        });
+        await helper.waitForNavigation('networkidle');
+        await helper.screenshot("SubmitToIACUC.png");
+    },
 
-        /*         await helper.clickOn('i.fa.IACUCPIOrSecMailboxIcon');
-                let contentSelector = 'a[href*="/IACUC/Comment/SecPIRequetList?ReviewItemId="]';
-                const ifrmSelector = '#commentIfr';
-                await helper.waitForiFrameRendered(ifrmSelector, contentSelector);
-                helper.setFrame(x => x.url().includes('/IACUC/Comment/CommentsFromReviewers?ReviewItemID='));
-                await helper.iframeClickOn('a[href*="/IACUC/Comment/MessageToPI?ReviewItemID="]');
-                await helper.waitForiFrameRendered(ifrmSelector, contentSelector);
-                await helper.screenshot("MessageToPI.png");
-                await helper.iframeClickOn('a > i.fa.fa-plus-square');
-                contentSelector = '#optionalSubject'; */
-
+    getisharerefno: async function(helper, data){
+        await helper.page.evaluate(()=>{
+            return document.querySelectorAll('#Study div.well-sm:nth-child(1) b')[1].textContent;
+        })
     }
 }

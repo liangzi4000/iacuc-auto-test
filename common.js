@@ -34,8 +34,14 @@ module.exports = {
             await this.page.type(value);
         }
 
+        this.setValue = async function (selector, value) {
+            await this.page.evaluate((sel) => {
+                document.querySelector(sel.selector).value = sel.value;
+            }, { selector, value })
+        }
+
         this.typeTextarea = async function (selector, value) {
-            await this.typeRichTextBox(selector, value, 5, 5);
+            await this.typeRichTextBox(selector, value, true);
         }
 
         this.setSelectVal = async function (selector, value, isframe = false) {
@@ -73,12 +79,28 @@ module.exports = {
             await this.page.waitForNavigation({ waitUntil: type });
         }
 
-        this.typeRichTextBox = async function (selector, value, rleft = 30, rtop = 34) {
+        this.typeRichTextBox = async function (selector, value, istextarea = false) {
             await this.scrollIntoElem(selector);
+            if (!istextarea) selector = `${selector} div.edui-editor-iframeholder.edui-default`;
+            await this.page.waitForFunction((selector) => {
+                return !!document.querySelector(selector);
+            }, { polling: 300 }, selector);
             let coordinator = await this.offset(selector);
-            await this.page.mouse.click(coordinator.left + rleft, coordinator.top + rtop, { clickCount: 2 });
+            await this.page.mouse.click(coordinator.left + coordinator.width / 2, coordinator.top + coordinator.height / 2, { clickCount: 2 });
             await this.page.type(value);
-            await this.page.mouse.click(0, 0);//trigger lose focus
+            await this.page.mouse.click(coordinator.left - 3, coordinator.top); //trigger lose focus
+        }
+
+        this.setRichTextBox = async function (selector, message, isframe = false) {
+            let context = this.page;
+            if (isframe) context = this.frame;
+            await context.evaluate((obj) => {
+                uectrl = UE.getEditor(obj.selector.replace('#', ''));
+                uectrl.ready(() => {
+                    document.querySelector(obj.selector).scrollIntoView();
+                    uectrl.setContent(obj.message);
+                });
+            }, { selector, message });
         }
 
         this.scrollIntoElem = async function (selector) {
@@ -115,7 +137,14 @@ module.exports = {
         this.offset = async function (selector) {
             let result = await this.page.evaluate((sel) => {
                 let box = document.querySelector(sel).getBoundingClientRect()
-                return Promise.resolve({ left: box.left, top: box.top });
+                return Promise.resolve({
+                    bottom: box.bottom,
+                    height: box.height,
+                    left: box.left,
+                    right: box.right,
+                    top: box.top,
+                    width: box.width
+                });
             }, selector);
             return result;
         }
@@ -171,10 +200,8 @@ module.exports = {
                     let doc = myIframe.contentWindow || myIframe.contentDocument;
                     if (doc.document) doc = doc.document;
                     if (doc.readyState == "complete" && doc.querySelector(sel.contentSelector)) {
-                        console.log(true)
                         return true;
                     } else {
-                        console.log(false)
                         return false;
                     }
                 }

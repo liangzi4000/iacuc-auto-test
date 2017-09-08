@@ -41,28 +41,22 @@ common.emptyFolder(fs);
         ],
         //slowMo: 120
     });
-    const formid = 'ac915032-993d-4391-8f0b-9dd375e3f683';
-    const formurl = `http://localhost:10000/IACUC/WorkSpace/Index?formfk=${formid}`;
+    const formid = '6435bd4b-59fe-4a28-9a6d-94b9f65bb5b0';
+    // http://localhost:10000/IACUC/ReviewWorkSpace/Index?formId=ac915032-993d-4391-8f0b-9dd375e3f683
+    // http://localhost:10000/IACUC/WorkSpace/Index?formfk=
+    //const formurl = `http://localhost:10000/IACUC/ReviewWorkSpace/Index?formId=${formid}`;
+    const formurl = 'http://localhost:10000/IACUC/ReviewWorkSpace/MeetingDetail?MeetingDetailId=7351e56f-d1cd-477d-ae78-71d91a198216&isPartial=false';
     const page = await browser.newPage();
     await page.setViewport({ width: data.Environment.resolution.width, height: data.Environment.resolution.height });
     const helper = new common.helper(page);
 
-    // Open login page
+    // Secretariat login to approve the application
     await ishare.openLandingPage(helper, data);
-    // Login
-    await ishare.login(helper, data.Secretariat);
-
-    await studyReview.secAppTaskList(helper, data);
+    await ishare.login(helper, data.Chairman);
+    await studyReview.gotoChairmanSignaturePage(helper, data);
     await studyReview.openFormInReviewWorkspace(helper, formid);
-    await studyReview.sendPreliminaryMsgToPI(helper, data);
-
+    await studyReview.signDecisionLetter(helper, formid);
     await ishare.logout(helper, data);
-    await ishare.openLandingPage(helper, data);
 
-
-    await ishare.login(helper, data.PI);
-    await studySubmission.openMyTaskIACUCList(helper, formid);
-    await studySubmission.replyIACUCQuery(helper, data);
-
-
+    console.log('Done');
 })()
