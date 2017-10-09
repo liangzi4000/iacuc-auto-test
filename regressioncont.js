@@ -41,22 +41,23 @@ common.emptyFolder(fs);
         ],
         //slowMo: 120
     });
-    const formid = '6435bd4b-59fe-4a28-9a6d-94b9f65bb5b0';
+    const formid = 'a5383a3e-ae4a-47fd-92cd-ec44c4f4f884';
+    const isharerefno = '201710-00001';
     // http://localhost:10000/IACUC/ReviewWorkSpace/Index?formId=ac915032-993d-4391-8f0b-9dd375e3f683
     // http://localhost:10000/IACUC/WorkSpace/Index?formfk=
     //const formurl = `http://localhost:10000/IACUC/ReviewWorkSpace/Index?formId=${formid}`;
-    const formurl = 'http://localhost:10000/IACUC/ReviewWorkSpace/MeetingDetail?MeetingDetailId=7351e56f-d1cd-477d-ae78-71d91a198216&isPartial=false';
+    const formurl = 'http://localhost:10000/IACUC/WorkSpace/Index?formfk=b8bc7029-dbd2-46c5-8432-fd332c5d4b2a&action=view';
     const page = await browser.newPage();
     await page.setViewport({ width: data.Environment.resolution.width, height: data.Environment.resolution.height });
     const helper = new common.helper(page);
+    const re = /formfk=([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i; // Regex to get application/amendment form id
 
-    // Secretariat login to approve the application
+    // Secretariat set study status to complete
     await ishare.openLandingPage(helper, data);
-    await ishare.login(helper, data.Chairman);
-    await studyReview.gotoChairmanSignaturePage(helper, data);
-    await studyReview.openFormInReviewWorkspace(helper, formid);
-    await studyReview.signDecisionLetter(helper, formid);
-    await ishare.logout(helper, data);
-
+    await ishare.login(helper, data.Secretariat);
+    await studyReview.gotoAllStudies(helper, data);
+    await studyReview.openReviewFolderFromAllStudies(helper, isharerefno);
+    await studyReview.setStudyStatus(helper, data.ReviewStatus.Stu.Complete);
+    
     console.log('Done');
 })()

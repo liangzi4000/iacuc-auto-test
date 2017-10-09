@@ -1,5 +1,12 @@
+const readline = require('readline');
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
 const screenshotpath = './screenshot/';
 const waitUntilEnum = { load: 'load', networkidle: 'networkidle' };
+const debugmode = false;
 
 module.exports = {
     emptyFolder: function (fs, path = screenshotpath, del = false) {
@@ -27,10 +34,35 @@ module.exports = {
         this.page = page;
         this.frame = null;
         this.indexCount = 1;
+        this.rl = rl;
 
-        this.type = async function (selector, value) {
+        this.question = async function (question) {
+            return new Promise(resolve => {
+                this.rl.question(question, (answer) => {
+                    return resolve(answer);
+                });
+            });
+        }
+
+        this.intervene = async function (question) {
+            let answer = "";
+            while (answer != "go") {
+                answer = await this.question(`${question}, please fix it and enter "go" to continue:`);
+            }
+        }
+
+        this.type = async function (selector, value, overwrite = false) {
             await this.page.waitForSelector(selector, { visible: true });
+            if (debugmode) { console.log(`WaitForSelector ${selector} success.`); }
             await this.page.focus(selector);
+            if (debugmode) { console.log(`focus ${selector} success.`); }
+            if (overwrite) {
+                await this.page.keyboard.down('Control');
+                await this.page.keyboard.down('a');
+                await this.page.keyboard.up('Control');
+                await this.page.keyboard.up('a');
+                await this.page.press('Backspace');
+            }
             await this.page.type(value);
         }
 
@@ -65,9 +97,15 @@ module.exports = {
             }, { selector, index })
         }
 
-        this.clickOn = async function (selector) {
+        this.clickOn = async function (selector, useJS = false) {
             await this.page.waitForSelector(selector, { visible: true });
-            await this.page.click(selector);
+            if (useJS) {
+                await this.page.evaluate((selector) => {
+                    document.querySelector(selector).click();
+                }, selector)
+            } else {
+                await this.page.click(selector);
+            }
         }
 
         this.gotoSection = async function (selector) {
@@ -76,7 +114,25 @@ module.exports = {
         }
 
         this.waitForNavigation = async function (type = waitUntilEnum.load) {
-            await this.page.waitForNavigation({ waitUntil: type });
+            try {
+                await this.page.waitForNavigation({ waitUntil: type });
+                // Make sure all the loading icon is invisible
+                await this.page.waitForFunction(() => {
+                    return Array.from(document.querySelectorAll('img[src*="icon_loading.gif"]')).every((elem) => {
+                        return elem.offsetParent === null;
+                    });
+                });
+            } catch (e) {
+                this.intervene('Navigation timeout');
+            }
+        }
+
+        this.waitForSelector = async function (selector) {
+            try {
+                await this.page.waitForSelector(selector, { visible: true });
+            } catch (e) {
+                this.intervene(`Wait for selector '${selector}' timeout`);
+            }
         }
 
         this.typeRichTextBox = async function (selector, value, istextarea = false) {

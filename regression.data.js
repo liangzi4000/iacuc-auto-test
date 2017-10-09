@@ -1,7 +1,8 @@
 module.exports = {
     Environment: {
         host: 'http://localhost:10000',
-        resolution: { width: 1366, height: 662 }
+        resolution: { width: 1366, height: 662 },
+        helperhost: 'http://localhost:10000/AutoTest/executesql.aspx'
     },
     Delegate: {
         loginid: 'ncmhth',
@@ -19,11 +20,11 @@ module.exports = {
         { name: 'Chen Yudong', cert: 't7tkeh', contact: '45898040', qualification: 'BSc' },
         { name: 'Ang Han Nian Marcus', cert: '90ehar', contact: '83945730', qualification: 'Dipl' }
     ],
-    YearAndNumber: { year: 2, number: [50, 20] },
+    YearAndNumber: { year: 2, number: [50, 20], amdnumber: [53, 11] },
     Vet: {
         loginid: 'srrbog',
         password: 'secretabc',
-        profile: { id: '65b72ffa-c17b-4234-9a95-78dbd277ca54', name: 'Ogden Bryan' }
+        profile: { vetid: '65b72ffa-c17b-4234-9a95-78dbd277ca54', name: 'Ogden Bryan' }
     },
     Secretariat: {
         loginid: 'srrlhl',
@@ -40,7 +41,7 @@ module.exports = {
         }
     },
     Meeting: {
-        id: '878c7d7e-5b55-4b51-b33f-d561cc3412d3'
+        id: '82c9ff9b-e98c-4859-ace4-d371a099c1cd'
     },
     Chairman: {
         loginid: 'eriabv',
@@ -50,21 +51,18 @@ module.exports = {
         loginid: 'ralph.bunte@duke-nus.edu.sg',
         password: 'secretabc',
         profile: { memid: '0c142f2d-02c9-489e-bd24-a792917ea8c0' },
-        comment: 'PR comment',
-        role: 'PR'
+        comment: 'PR comment'
     },
     SR: {
         loginid: 'srrmto',
         password: 'secretabc',
         profile: { memid: 'c95737ee-0762-4ea3-8e7b-1828baf16204' },
-        comment: 'SR comment',
-        role: 'SR'
+        comment: 'SR comment'
     },
     OtherReviewer: {
         loginid: 'srrbog',
         password: 'secretabc',
-        comment: 'Other Reviewer comment',
-        role: 'OtherReviewer'
+        comment: 'Other Reviewer comment'
     },
     ReviewerComment: {
         subject: `Reviewer Comment ${+new Date()}`,
@@ -74,6 +72,20 @@ module.exports = {
             sectionC: 'Edit section C for reviewer comment',
             sectionD: 'Edit section D for reviewer comment'
         }
+    },
+    ReviewStatus: {
+        Amd: {
+            PendingSecretariatReview: { code: '011', name: 'PendingSecretariatReview' },
+            Approve: { code: '007', name: 'Approve' }
+        },
+        Apu: {
+            Acknowledge: { code: '011', name: 'Acknowledge' }
+        },
+        Fpr: {
+            Acknowledge: { code: '011', name: 'Acknowledge' }
+        },
+        Stu: {
+            Complete: { code: '005', name: 'Complete' }
+        }
     }
-
 }

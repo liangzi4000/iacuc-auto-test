@@ -2,7 +2,7 @@ module.exports = {
     execute: async function (helper, data) {
         await helper.gotoSection('a.list-group-item[key="section_a"]');
         await helper.type('#Form_SA1_1', 'Auto Test Protocol ' + Date());
-        await helper.clickOn('#Form_SA1_2 + span')
+        await helper.clickOn('#Form_SA1_2 + span');
         await helper.clickOn('div.bootstrap-datetimepicker-widget.dropdown-menu[style*="display: block"] > div.datepicker > div.datepicker-days > table.table-condensed > thead > tr:nth-child(1) > th.next');
         await helper.clickOn('div.bootstrap-datetimepicker-widget.dropdown-menu[style*="display: block"] > div.datepicker > div.datepicker-days > table.table-condensed > tbody > tr:nth-child(2) > td:nth-child(3)');
         await helper.setSelectVal('#Form_SA1_3', data.YearAndNumber.year);
