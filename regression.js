@@ -51,15 +51,15 @@ console.time('total');
     const helper = new common.helper(page);
     const re = /formfk=([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i; // Regex to get application/amendment form id
 
-    // Open login page
+    console.log('Open login page');
     await ishare.openLandingPage(helper, data);
-    // Login
+    console.log('Login as Delegate');
     await ishare.login(helper, data.Delegate);
-    // Create IACUC form
+    console.log('Create IACUC form');
     await studySubmission.createApplicationForm(helper, data);
-    // Close the warning popup window
+    console.log('Close the warning popup window');
     await studySubmission.closeSaveFormWarning(helper, data);
-    // Fill up form
+    console.log('Begin to fill up form');
     await sectionDeclaration.execute(helper, data);
     await sectionStudyFund.execute(helper, data);
     await sectionA.execute(helper, data);
@@ -85,70 +85,105 @@ console.time('total');
     await sectionN.execute(helper, data);
     await sectionO.execute(helper, data);
     await sectionP.execute(helper, data);
+    console.log('Finalize form');
     await studySubmission.finalize(helper, data);
+    console.log('Submit form to Vet');
     await studySubmission.submitForVetChecklist(helper, data);
+    console.log('Print form');
     await studySubmission.printForm(helper, data);
     //await studySubmission.exportToPdf(helper, browser);
+
+    console.log('Logout');
     await ishare.logout(helper, data);
 
-    // Vet Login
+    console.log('Login as Vet');
     await studySubmission.resetConnection(helper, data, formid);
     await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.Vet);
+    console.log('Open vet checklist task');
     await studySubmission.vetChecklistTaskList(helper, formid);
     //await helper.delay(130);
+    console.log('Fill up vet checklist and return to PI');
     await studySubmission.returnVetChecklist(helper, data);
+    console.log('Logout');
     await ishare.logout(helper, data);
 
+    console.log('Login as PI');
     await studySubmission.resetConnection(helper, data, formid);
     // PI declaration and submission
     await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.PI);
+    console.log('Open PI My task list');
     await studySubmission.piMyTaskIACUCList(helper, formid);
+    console.log('PI declare and submit form to IACUC');
     await studySubmission.declareAndSubmitToIACUC(helper, data);
+    console.log('Logout');
     await ishare.logout(helper, data);
 
-    // Secretariat login to send preliminary check message
+    console.log('Secretariat login to send preliminary check message');
     await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.Secretariat);
+    console.log('Open IACUC new application list');
     await studyReview.secAppTaskList(helper, data);
+    console.log('Open IACUC form in review workspace');
     await studyReview.openFormInReviewWorkspace(helper, formid);
+    console.log('Send preliminary message to PI');
     await studyReview.sendPreliminaryMsgToPI(helper, data);
+    console.log('Logout');
     await ishare.logout(helper, data);
 
-    // PI Login to reply preliminary check message
+    console.log('PI Login to reply preliminary check message');
     await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.PI);
+    console.log('Open PI My task list');
     await studySubmission.piMyTaskIACUCList(helper, formid);
+    console.log('Reply IACUC query');
     await studySubmission.replyIACUCQuery(helper, data.PreliminaryCheck);
+    console.log('Unlock form');
     await studySubmission.unlockForm(helper, data);
+    console.log('Edit form');
     await studySubmission.editForm(helper, data.PreliminaryCheck);
+    console.log('Finallize form');
     await studySubmission.finalize(helper, data);
+    console.log('Submit form to IACUC');
     await studySubmission.submitToIACUC(helper, data);
+    console.log('Logout');
     await ishare.logout(helper, data);
 
-    // Secretariat login to complete preliminary check
+    console.log('Secretariat login to complete preliminary check');
     await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.Secretariat);
+    console.log('Open IACUC new application list');
     await studyReview.secAppTaskList(helper, data);
+    console.log('Open IACUC form in review workspace');
     await studyReview.openFormInReviewWorkspace(helper, formid);
+    console.log('Complete preliminary check');
     await studyReview.completePreliminaryCheck(helper, formid);
+    console.log('Open track change');
     await studyReview.viewTrackChange(helper, data, browser, common);
+    console.log('Assign application to meeting');
     await studyReview.assignStudyToMeeting(helper, data);
+    console.log('Open meeting and setup meeting schedule');
     await studyReview.gotoMeetingSchedule(helper, data);
+    console.log('Notify chairman to assign PR/SR');
     await studyReview.gotoMeetingApplicationList(helper, data);
+    console.log('Logout');
     await ishare.logout(helper, data);
 
-    // Chairman login to assign PR/SR
+    console.log('Chairman login to assign PR/SR');
     await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.Chairman);
+    console.log('Click on Chairman assign PR/SR tile');
     await studyReview.chrAssignPRSRTaskList(helper, data);
+    console.log('Assign PR/SR');
     await studyReview.assignPRSR(helper, data);
+    console.log('Logout');
     await ishare.logout(helper, data);
 
-    // PR login to comment
+    console.log('PR login to comment');
     await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.PR);
+    
     await studyReview.rverPendingCommitteeReviewTaskList(helper, data);
     await studyReview.openFormInReviewWorkspace(helper, formid);
     await studyReview.comment(helper, data.PR.comment);

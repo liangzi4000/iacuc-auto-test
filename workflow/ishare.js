@@ -3,7 +3,7 @@ module.exports = {
         await helper.type('#txtUserID', data.loginid);
         await helper.type('#txtPassword', data.password);
         await helper.clickOn('#btnLogin');
-        await helper.waitForNavigation('networkidle');
+        await helper.waitForNavigation();
         let currentLoginId = await this.getCurrentLoginId(helper);
         if (currentLoginId != data.loginid) {
             await helper.intervene(`Dashboard cache issue encountered, expected login id is ${data.loginid}`);

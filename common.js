@@ -114,25 +114,21 @@ module.exports = {
         }
 
         this.waitForNavigation = async function (type = waitUntilEnum.load) {
-            try {
-                await this.page.waitForNavigation({ waitUntil: type });
-                // Make sure all the loading icon is invisible
-                await this.page.waitForFunction(() => {
-                    return Array.from(document.querySelectorAll('img[src*="icon_loading.gif"]')).every((elem) => {
-                        return elem.offsetParent === null;
-                    });
+            await this.page.waitForNavigation({ waitUntil: type }).catch(() => {
+                this.intervene("Navigation timeout");
+            });
+            // Make sure all the loading icon is invisible
+            await this.page.waitForFunction(() => {
+                return Array.from(document.querySelectorAll('img[src*="icon_loading.gif"]')).every((elem) => {
+                    return elem.offsetParent === null;
                 });
-            } catch (e) {
-                this.intervene('Navigation timeout');
-            }
+            });
         }
 
         this.waitForSelector = async function (selector) {
-            try {
-                await this.page.waitForSelector(selector, { visible: true });
-            } catch (e) {
+            await this.page.waitForSelector(selector, { visible: true }).catch(() => {
                 this.intervene(`Wait for selector '${selector}' timeout`);
-            }
+            });
         }
 
         this.typeRichTextBox = async function (selector, value, istextarea = false) {
