@@ -50,7 +50,10 @@ console.time('total');
     await page.setViewport({ width: data.Environment.resolution.width, height: data.Environment.resolution.height });
     const helper = new common.helper(page);
     const re = /formfk=([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i; // Regex to get application/amendment form id
-
+    let formid = '50133cde-323c-4879-9746-905ae9c3f2c0';
+    let isharerefno = '201803-00001';
+    let amdformid = '431e544b-9953-4246-a0c5-0bd716d38010';
+    
     console.log('Open login page');
     await ishare.openLandingPage(helper, data);
     console.log('Login as Delegate');
@@ -65,9 +68,9 @@ console.time('total');
     await sectionA.execute(helper, data);
     await studySubmission.closeSaveFormWarning(helper, data);
 
-    const formid = helper.page.url().match(re)[1];
+    formid = helper.page.url().match(re)[1];
     console.log('Application form id: ' + formid);
-    const isharerefno = await studySubmission.getisharerefno(helper, data);
+    isharerefno = await studySubmission.getisharerefno(helper, data);
     console.log('ishare ref no: ' + isharerefno);
 
     await sectionB.execute(helper, data);
@@ -205,13 +208,17 @@ console.time('total');
     await studyReview.comment(helper, data.OtherReviewer.comment);
     await ishare.logout(helper, data);
 
-    // Secretariat login to send out agenda
+    // Secretariat login to send out agenda and send comment to PI
     await ishare.openLandingPage(helper, data);
     await ishare.login(helper, data.Secretariat);
     await studyReview.gotoMeetingMaterials(helper, data);
     await studyReview.gotoMeetingDecision(helper, data);
+    await helper.page.goto(`${data.Environment.host}/IACUC/ReviewWorkspace/MeetingDetail?MeetingDetailId=${data.Meeting.id}&ispartial=false`);
+    await helper.clickOn('a[onclick*="/IACUC/ReviewWorkspace/Decision"]');
+    await helper.waitForNavigation('networkidle');
+
     await studyReview.openSecMailbox(helper, data);
-    await studyReview.ackReviewerComment(helper, data);
+    //await studyReview.ackReviewerComment(helper, data);
     await studyReview.sendReviewerCommentToPI(helper, data);
     await ishare.logout(helper, data);
 
@@ -249,7 +256,7 @@ console.time('total');
     await ishare.login(helper, data.PI);
     await studySubmission.gotoStudyWorkspace(helper, isharerefno);
     await studySubmission.createAmendmendForm(helper, isharerefno);
-    const amdformid = helper.page.url().match(re)[1];
+    amdformid = helper.page.url().match(re)[1];
     console.log(`Amendment form id: ${amdformid}`);
     await studySubmission.closeSaveFormWarning(helper, data);
     await studySubmission.fillAmendmentForm(helper, data);

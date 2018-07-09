@@ -127,21 +127,33 @@ module.exports = {
 
     gotoMeetingMaterials: async function (helper, data) {
         this.gotoMeeting(helper, data);
+        // Click on "Meeting Material" tab
         await helper.clickOn('a[onclick*="/IACUC/ReviewWorkspace/Materials"]');
         await helper.waitForNavigation('networkidle');
+        // Type Any Other Matters
         await helper.typeRichTextBox('#OtherMatters', 'Any other matters - test');
         await helper.screenshot("EditMeetingMaterial.png");
         await helper.clickOn('i.fa.IACUCSaveIcon');
         await helper.waitForNavigation('networkidle');
+        // Click on print agenda icon
         await helper.clickOn('i.fa.IACUCPrintIcon');
         await helper.waitForiFrameRendered('#printAgendaIfr', 'div.form-group');
         await helper.screenshot("PrintAgenda.png");
-        await helper.clickOn('#modal_warming button.close');
+        // Close print agenda window
+        await helper.clickOn('#modal_warming button[ms-click="cancel"]');
+        // Click on Send Materials icon
         await helper.clickOn('i.fa.IACUCReplayMsgToSecIcon');
         await helper.waitForNavigation('networkidle');
+        // Confirm to send
         await helper.clickOn('button.btn.btn-green[ms-click="ok"]');
         await helper.waitForNavigation('networkidle');
         await helper.screenshot("SendMeetingMaterial.png");
+        // Remove all messages
+        await helper.page.evaluate(() => {
+            document.querySelectorAll('div.notifications.top-center a.close.pull-right').forEach((elem) => {
+                elem.click();
+            });
+        });
     },
 
     openSecMailbox: async function (helper, data) {
@@ -189,10 +201,12 @@ module.exports = {
             });
         });
         await helper.iframeClickOn('i.fa.fa-refresh');
-        await helper.waitForiFrameRendered(ifrmSelector, '#optionalSubject');
+        //await helper.waitForiFrameRendered(ifrmSelector, 'i.fa.fa-chevron-right');
+        await helper.page.waitForNavigation({waitUntil:'networkidle',networkIdleTimeout:5000});
 
         // Type the message subject
         await helper.iframeType(ifrmSelector, '#optionalSubject', data.ReviewerComment.subject);
+
         // Tick release form
         await helper.iframeClickOn('#IsReleaseForm');
         // Copy reviewer message 
@@ -228,7 +242,6 @@ module.exports = {
         await helper.clickOn('#modal_warming button.btn.btn-green[ms-click="ok"]');
         await helper.waitForNavigation('networkidle');
         await helper.screenshot("DecisionClickedCompleted.png");
-
     },
 
     updateReviewStatus: async function (helper, status) {
