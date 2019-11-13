@@ -332,7 +332,7 @@ module.exports = {
         await helper.type('#Filter_iSHaReRefNo', isharerefno);
         await helper.clickOn('#btnSearch');
         await helper.waitForNavigation('networkidle');
-        await helper.clickOn('a[href*="/IACUC/StudyFolder/StudyFolderForm"]');
+        await helper.clickOn('a[href*="/IACUC/StudyFolder/StudyFolderForm"]',true);
         await helper.waitForNavigation();
         await helper.screenshot(`ReviewFolder_${isharerefno}.png`);
     },

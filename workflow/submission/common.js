@@ -64,7 +64,7 @@ module.exports = {
     },
 
     openFormInStudyWorkspace: async function (helper, formid) {
-        await helper.clickOn(`a[href="/IACUC/WorkSpace/Index?formFk=${formid}"]`);
+        await helper.clickOn(`a[href="/IACUC/WorkSpace/Index?formFk=${formid}"]`,true);
         await helper.waitForNavigation();
     }
 }

@@ -41,7 +41,7 @@ module.exports = {
         }
     },
     Meeting: {
-        id: '3ca32935-45ce-4407-b011-b0343ac44587'
+        id: 'f0729632-345e-4555-8cf9-5a32a7cc6078'
     },
     Chairman: {
         loginid: 'eriabv',
