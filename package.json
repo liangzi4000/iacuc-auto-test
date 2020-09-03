@@ -4,7 +4,7 @@
   "description": "Test out the capacity of puppeteer",
   "main": "index.js",
   "dependencies": {
-    "puppeteer": "^0.10.2"
+    "puppeteer": "^1.13.0"
   },
   "devDependencies": {},
   "scripts": {
